@@ -3,3 +3,10 @@ django-cors-headers
 djangorestframework
 python-dotenv
 google-generativeai
+asgiref
+django-cors-headers
+djangorestframework-simplejwt
+PyJWT
+pytz
+sqlparse
+psycopg2-binary
