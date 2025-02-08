@@ -2,6 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from .models import BankAccount, Transaction, ChatSession, ChatMessage
+from .serializers import BankAccountSerializer, TransactionSerializer, ChatSessionSerializer, ChatMessageSerializer
 from django.conf import settings
 import google.generativeai as genai
 from .models import BankAccount, Transaction, ChatSession, ChatMessage
@@ -28,6 +34,11 @@ class BankAccountViewSet(BaseViewSet):
 class TransactionViewSet(BaseViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+
+# If the user sends a message, it saves it in the database.
+# The AI generates a response using Gemini.
+# The AI response is saved in the database.
+# The API returns both the user message and AI response.
 
 class ChatSessionViewSet(BaseViewSet):
     queryset = ChatSession.objects.all()
@@ -92,3 +103,22 @@ class ChatSessionViewSet(BaseViewSet):
 class ChatMessageViewSet(BaseViewSet):
     queryset = ChatMessage.objects.all()
     serializer_class = ChatMessageSerializer
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_data(request):
+    user = request.user
+
+    accounts = BankAccount.objects.filter(user=user)
+    transactions = Transaction.objects.filter(account__user=user)
+    chat_sessions = ChatSession.objects.filter(user=user)
+
+    accounts_data = BankAccountSerializer(accounts, many=True).data
+    transactions_data = TransactionSerializer(transactions, many=True).data
+    chat_sessions_data = ChatSessionSerializer(chat_sessions, many=True).data
+
+    return Response({
+        "accounts": accounts_data,
+        "transactions": transactions_data,
+        "chat_sessions": chat_sessions_data,
+    })
