@@ -1,7 +1,16 @@
-require('dotenv').config()
+// src/config/database.ts
+import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-const dbUrl: string = process.env.DB_CONN_STRING as string;
+// Load env variables
+dotenv.config();
+
+const dbUrl = process.env.DB_CONN_STRING;
+
+if (!dbUrl) {
+    console.error("DB_CONN_STRING is not defined in environment variables");
+    process.exit(1);
+}
 
 const connectDB = async () => {
     try {
@@ -9,6 +18,7 @@ const connectDB = async () => {
         console.log("Connected to the db");
     } catch (err) {
         console.error("Failed to connect to the db", err);
+        process.exit(1);
     }
 };
 
