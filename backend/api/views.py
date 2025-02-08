@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
 from .models import BankAccount, Transaction, ChatSession, ChatMessage
 from .serializers import BankAccountSerializer, TransactionSerializer, ChatSessionSerializer, ChatMessageSerializer
 from django.conf import settings
@@ -31,9 +32,35 @@ class BankAccountViewSet(BaseViewSet):
     queryset = BankAccount.objects.all()
     serializer_class = BankAccountSerializer
 
-class TransactionViewSet(BaseViewSet):
-    queryset = Transaction.objects.all()
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_bank_accounts_by_user_id(request):
+    """Retrieve all bank accounts for a specific user ID"""
+    user_id = request.query_params.get("id")  # Get user ID from query parameters
+
+    if not user_id:
+        return Response({"error": "User ID is required"}, status=400)
+
+    accounts = BankAccount.objects.filter(user__id=user_id)
+
+    if not accounts.exists():
+        return Response({"error": "No accounts found for this user"}, status=404)
+
+    serialized_accounts = BankAccountSerializer(accounts, many=True)
+    return Response(serialized_accounts.data)
+
+
+class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
+
+    def get_queryset(self):
+        """Filter transactions based on a specific account number"""
+        account_number = self.request.query_params.get("account_number")
+
+        if account_number:
+            return Transaction.objects.filter(account__user=self.request.user, account__account_number=account_number)
+        return Transaction.objects.filter(account__user=self.request.user)
+
 
 # If the user sends a message, it saves it in the database.
 # The AI generates a response using Gemini.
@@ -100,9 +127,17 @@ class ChatSessionViewSet(BaseViewSet):
         except Exception as e:
             raise Exception(f"Gemini API error: {str(e)}")
 
-class ChatMessageViewSet(BaseViewSet):
-    queryset = ChatMessage.objects.all()
+class ChatMessageViewSet(viewsets.ModelViewSet):
     serializer_class = ChatMessageSerializer
+
+    def get_queryset(self):
+        """Filter chat messages based on account number"""
+        account_number = self.request.query_params.get("account_number")
+
+        if account_number:
+            return ChatMessage.objects.filter(session__user=self.request.user, session__account__account_number=account_number)
+        return ChatMessage.objects.filter(session__user=self.request.user)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

@@ -21,6 +21,7 @@ class Transaction(models.Model):
 
 class ChatSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_sessions")
+    account = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name="chat_sessions")  # New field
     session_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     started_at = models.DateTimeField(auto_now_add=True)
 

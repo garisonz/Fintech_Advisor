@@ -3,9 +3,10 @@ from rest_framework import serializers
 from .models import BankAccount, Transaction, ChatSession, ChatMessage
 
 class BankAccountSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     class Meta:
         model = BankAccount
-        fields = ['id', 'account_number', 'balance']
+        fields = ["id", "account_number", "balance", "user_id"]
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:

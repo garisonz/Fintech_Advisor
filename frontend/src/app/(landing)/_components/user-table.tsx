@@ -11,25 +11,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fetchAccounts, type BankAccount } from '@/services/api';
-import { useState, useEffect } from 'react';
+import { fetchAccounts, type BankAccount } from "@/services/api";
+import { useState, useEffect } from "react";
 
 export function AccountTable() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter(); // Correct usage of Next.js router
+  const router = useRouter(); 
 
   useEffect(() => {
     const loadAccounts = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        setIsLoading(true);
         const data = await fetchAccounts();
-        setAccounts(data);
-        setError(null);
-      } catch (error) {
-        console.error('Error loading accounts:', error);
-        setError('Failed to load accounts');
+        if (data.error) {
+          setError(data.error);
+        } else {
+          setAccounts(data || []);
+        }
+      } catch (err) {
+        console.error("Error loading accounts:", err);
+        setError("Failed to load accounts.");
       } finally {
         setIsLoading(false);
       }
@@ -54,39 +59,32 @@ export function AccountTable() {
     );
   }
 
-  // Calculate total balance
-  const totalBalance = accounts.reduce((sum, account) =>
-    sum + parseFloat(account.balance.toString()), 0
-  );
-
-  // Handle row click to navigate to user account page
-  const handleRowClick = (accountId: string) => {
-    router.push(`/account/${accountId}`); // Navigate to the account's page
+  const handleRowClick = (userId: number) => {
+    router.push(`/bank-accounts/${userId}`); 
   };
 
   return (
     <Table>
-      <TableCaption>A list of your recent invoices.</TableCaption>
+      <TableCaption>A list of your bank accounts.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[100px]">ID</TableHead>
-          <TableHead>Acc Id</TableHead>
+          <TableHead>Account Number</TableHead>
           <TableHead>Balance</TableHead>
-          <TableHead className="text-right"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {accounts.map((account) => (
-          <TableRow 
-            key={account.id} 
+          <TableRow
+            key={account.id}
             className="cursor-pointer hover:bg-gray-100 transition"
-            onClick={() => handleRowClick(account.account_number)}
+            onClick={() => handleRowClick(account.user_id)}  
           >
             <TableCell className="font-medium">{account.id}</TableCell>
             <TableCell>{account.account_number}</TableCell>
             <TableCell>
-              <span className={account.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                ${Math.abs(parseFloat(account.balance.toString())).toFixed(2)}
+              <span className={account.balance >= 0 ? "text-green-600" : "text-red-600"}>
+                ${parseFloat(account.balance.toString()).toFixed(2)}
               </span>
             </TableCell>
           </TableRow>
@@ -95,7 +93,7 @@ export function AccountTable() {
       <TableFooter>
         <TableRow>
           <TableCell colSpan={2}>Total Accounts</TableCell>
-          <TableCell colSpan={2} className="text-right">{accounts.length}</TableCell>
+          <TableCell className="text-right">{accounts.length}</TableCell>
         </TableRow>
       </TableFooter>
     </Table>

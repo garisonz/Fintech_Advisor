@@ -1,6 +1,6 @@
 // pages/index.tsx
 import React from 'react';
-import BankAccountDisplay from './_components/bank';
+import BankAccountPage from './_components/bank';
 import TransactionHistory from './_components/transactions';
 import ChatHistory from './_components/chat-history';
 import ChatInterface from './_components/chat-interface';
@@ -15,13 +15,12 @@ export default function Home() {
         </h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <BankAccountDisplay />
-          <TransactionHistory />
+          <BankAccountPage />
+          
         </div>
         
         <div className="mt-6 grid grid-cols-1 gap-6">
-          <ChatInterface />
-          <ChatHistory />
+          
         </div>
       </div>
     </div>
