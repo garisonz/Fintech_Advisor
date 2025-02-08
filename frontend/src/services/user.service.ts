@@ -3,14 +3,12 @@ import { api } from '../lib/axios';
 export interface User {
     userId: string;
     accounts: string[];
-    transactions: string[];
     chatHistory: string[];
 }
 
 export interface CreateUserDto {
     userId: string;
     accounts: string[];
-    transactions: string[];
     chatHistory: string[];
 }
 

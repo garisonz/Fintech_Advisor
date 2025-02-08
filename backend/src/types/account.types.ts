@@ -1,24 +1,23 @@
-import { Document } from 'mongoose';
-import { ObjectId } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-// Define account types
 export type AccountType = 'checking' | 'savings' | 'credit' | 'investment';
 
-// Main Account interface extending Document
 export interface IAccount extends Document {
-   userId: ObjectId;
+   userId: Types.ObjectId;
    accountNumber: string;
    accountType: AccountType;
    balance: number;
+   transactions: Types.ObjectId[];
+   createdAt: Date;
+   updatedAt: Date;
 }
 
-// DTO for creating a new account
 export interface CreateAccountDto {
-   userId: string;           // String for API requests
+   userId: string;
    accountNumber: string;
    accountType: AccountType;
    balance: number;
+   transactions?: string[];
 }
 
-// DTO for updating an account (all fields optional)
-export interface UpdateAccountDto extends Partial<CreateAccountDto> {}
+export interface UpdateAccountDto extends Partial<Omit<CreateAccountDto, 'userId'>> {}

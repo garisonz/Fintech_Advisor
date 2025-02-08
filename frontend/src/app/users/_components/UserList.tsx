@@ -35,7 +35,7 @@ export default function UserList() {
                     <h2 className="text-xl font-semibold mb-2">User ID: {user.userId}</h2>
                     <div className="space-y-2">
                         <p>Accounts: {user.accounts.length}</p>
-                        <p>Transactions: {user.transactions}</p>
+                        
                         <p>Chat History: {user.chatHistory}</p>
                     </div>
                 </div>

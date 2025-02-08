@@ -15,7 +15,6 @@ export class UserService {
     static async getUsers(): Promise<IUser[]> {
         const users = await User.find()
             .populate('accounts')
-            .populate('transactions')
             .populate('chatHistory');
         return users;
     }
