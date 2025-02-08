@@ -63,6 +63,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+GEMINI_API_KEY = 'AIzaSyDZL9NmgKZK2wfmctTD1amKcz0Iuta2k1o'
+
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
