@@ -2,12 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-<<<<<<< Updated upstream
-  "main": "dist/server.js",
-  "type": "module",
-=======
   "main": "src/server.ts",
->>>>>>> Stashed changes
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "rimraf dist && tsc",
