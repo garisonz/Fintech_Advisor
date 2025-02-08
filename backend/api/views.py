@@ -24,6 +24,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
 class BaseViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     """Base viewset with common functionality"""
     def get_object_or_404(self, pk):
         return get_object_or_404(self.queryset, pk=pk)
@@ -35,6 +36,7 @@ class BankAccountViewSet(BaseViewSet):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_bank_accounts_by_user_id(request):
+    permission_classes = [AllowAny]
     """Retrieve all bank accounts for a specific user ID"""
     user_id = request.query_params.get("id")  # Get user ID from query parameters
 
@@ -51,6 +53,7 @@ def get_bank_accounts_by_user_id(request):
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     serializer_class = TransactionSerializer
 
     def get_queryset(self):
@@ -68,6 +71,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 # The API returns both the user message and AI response.
 
 class ChatSessionViewSet(BaseViewSet):
+    permission_classes = [AllowAny]
     queryset = ChatSession.objects.all()
     serializer_class = ChatSessionSerializer
 
@@ -128,6 +132,7 @@ class ChatSessionViewSet(BaseViewSet):
             raise Exception(f"Gemini API error: {str(e)}")
 
 class ChatMessageViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     serializer_class = ChatMessageSerializer
 
     def get_queryset(self):
@@ -140,7 +145,7 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_user_data(request):
     user = request.user
 
