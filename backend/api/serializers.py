@@ -20,15 +20,17 @@ class TransactionSerializer(serializers.ModelSerializer):
         return value
 
 class ChatMessageSerializer(serializers.ModelSerializer):
+    """Serializer for individual chat messages."""
     class Meta:
         model = ChatMessage
-        fields = ['id', 'session', 'message', 'is_bot', 'timestamp']
-        read_only_fields = ['timestamp']
+        fields = ["id", "session", "message", "is_bot", "timestamp"]
+        read_only_fields = ["id", "session", "timestamp"]
 
 class ChatSessionSerializer(serializers.ModelSerializer):
-    messages = ChatMessageSerializer(many=True, read_only=True)
+    """Serializer for chat sessions with nested messages."""
+    messages = ChatMessageSerializer(many=True, read_only=True)  # Nested messages
 
     class Meta:
         model = ChatSession
-        fields = ['id', 'session_id', 'started_at', 'messages']
-        read_only_fields = ['session_id', 'started_at']
+        fields = ["id", "session_id", "user", "account", "started_at", "messages"]
+        read_only_fields = ["id", "session_id", "started_at"]

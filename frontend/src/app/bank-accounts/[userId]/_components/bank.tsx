@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import { getBankAccountsByUserId } from "@/services/api";
 
 const BankAccountPage = () => {
-  const { userId } = useParams();  // ✅ Extract userId from URL
+  const params = useParams();
+  const userId = params?.userId as string | undefined;
 
-  console.log("Extracted userId from URL:", userId);  // 🐛 Debugging step
+  console.log("Extracted userId from URL:", userId);
 
   const [accounts, setAccounts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +17,7 @@ const BankAccountPage = () => {
   useEffect(() => {
     if (userId) {
       console.log("Fetching bank accounts for user:", userId);
-      fetchBankAccounts(userId as string);
+      fetchBankAccounts(userId);
     }
   }, [userId]);
 
@@ -27,15 +28,14 @@ const BankAccountPage = () => {
     try {
       const { data, error } = await getBankAccountsByUserId(Number(id));
 
-      console.log("API Response:", data);  // 🐛 Debugging step
+      console.log("API Response:", data);
 
       if (error) {
-        console.error("API Error:", error);
         setError(error);
         setAccounts([]);
       } else if (!data || data.length === 0) {
         console.warn("No accounts found for this user.");
-        setAccounts([]);  // Handle empty response
+        setAccounts([]);
       } else {
         setAccounts(data);
       }
@@ -61,7 +61,10 @@ const BankAccountPage = () => {
       {!isLoading && accounts.length > 0 && (
         <div className="space-y-4">
           {accounts.map((account) => (
-            <div key={account.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div
+              key={account.id}
+              className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+            >
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-gray-600">Account Number</p>

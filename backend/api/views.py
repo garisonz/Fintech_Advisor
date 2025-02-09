@@ -18,11 +18,53 @@ from .serializers import (
     ChatSessionSerializer,
     ChatMessageSerializer
 )
+import google.generativeai as genai
+from django.shortcuts import HttpResponse
+from django.contrib.auth.models import User
+from .models import BankAccount, Transaction
+from django.contrib.auth.models import User
 
 # Configure Gemini API
 #commentsntl sdnlndgha ghd
-genai.configure(api_key=settings.GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+API_KEY = "AIzaSyCzA5B-j7dySGJf5V7EuNUyE8t5hObaayM"
+genai.configure(api_key=API_KEY)
+
+def generate_account_summary(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        account = BankAccount.objects.filter(user=user).first()
+        if not account:
+            return HttpResponse("No bank account found for this user.")
+
+        # Get last 5 transactions
+        transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:5]
+
+        # Format transaction details
+        transaction_summary = "\n".join([
+            f"{t.timestamp}: {t.transaction_type} of ${t.amount}" for t in transactions
+        ])
+
+        # AI Prompt
+        prompt = f"""
+        Analyze the following bank account details and transactions. 
+        Provide insights on spending habits and suggestions for saving.
+
+        User: {user.username}
+        Account Number: {account.account_number}
+        Current Balance: ${account.balance}
+
+        Recent Transactions:
+        {transaction_summary}
+        """
+
+        # Generate AI response
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(prompt)
+
+        return HttpResponse(response.text)
+
+    except User.DoesNotExist:
+        return HttpResponse("User not found.")
 
 class BaseViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
@@ -51,6 +93,32 @@ def get_bank_accounts_by_user_id(request):
 
     serialized_accounts = BankAccountSerializer(accounts, many=True)
     return Response(serialized_accounts.data)
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_transactions_by_user_id(request):
+    """Retrieve all transactions for a specific user ID"""
+    user_id = request.query_params.get("id")  # Get user ID from query parameters
+
+    if not user_id:
+        return Response({"error": "User ID is required"}, status=400)
+
+    # Get accounts linked to the user
+    accounts = BankAccount.objects.filter(user_id=user_id)
+
+    if not accounts.exists():
+        return Response({"error": "No accounts found for this user"}, status=404)
+
+    # Retrieve transactions for these accounts
+    transactions = Transaction.objects.filter(account__in=accounts).select_related("account")
+
+    if not transactions.exists():
+        return Response({"error": "No transactions found for this user"}, status=404)
+
+    # Serialize transactions
+    serialized_transactions = TransactionSerializer(transactions, many=True)
+    
+    return Response(serialized_transactions.data)
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
@@ -163,3 +231,42 @@ def get_user_data(request):
         "transactions": transactions_data,
         "chat_sessions": chat_sessions_data,
     })
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def start_chat_session(request):
+    """ Start a new chat session """
+    account_id = request.data.get("account_id")  # Optional
+    session = ChatSession.objects.create(user=request.user, account_id=account_id)
+    serializer = ChatSessionSerializer(session)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def send_message(request, session_id):
+    """ Send a message in an existing chat session """
+    session = get_object_or_404(ChatSession, session_id=session_id, user=request.user)
+    serializer = ChatMessageSerializer(data=request.data)
+
+    if serializer.is_valid():
+        # Save user message
+        user_message = serializer.save(session=session, is_bot=False)
+
+        # Simple AI bot response (Replace with AI logic)
+        bot_response_text = f"Echo: {user_message.message}"  
+        bot_message = ChatMessage.objects.create(session=session, message=bot_response_text, is_bot=True)
+
+        return Response({
+            "user_message": ChatMessageSerializer(user_message).data,
+            "bot_response": ChatMessageSerializer(bot_message).data
+        }, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_chat_history(request, session_id):
+    """ Retrieve chat history for a session """
+    session = get_object_or_404(ChatSession, session_id=session_id, user=request.user)
+    serializer = ChatSessionSerializer(session)
+    return Response(serializer.data)
