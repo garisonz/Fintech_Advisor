@@ -76,6 +76,10 @@ const BankAccountPage = () => {
                     ${parseFloat(account.balance.toString()).toFixed(2)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-gray-600">Type</p>
+                  <p className="font-semibold">{account.account_type}</p>
+                </div>
               </div>
             </div>
           ))}

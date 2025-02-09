@@ -65,12 +65,13 @@ export function AccountTable() {
 
   return (
     <Table>
-      <TableCaption>A list of your bank accounts.</TableCaption>
+      <TableCaption>A list of the total bank accounts managed.</TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">ID</TableHead>
+          <TableHead className="w-[100px]">#</TableHead>
           <TableHead>Account Number</TableHead>
           <TableHead>Balance</TableHead>
+          <TableHead>Id</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -87,12 +88,15 @@ export function AccountTable() {
                 ${parseFloat(account.balance.toString()).toFixed(2)}
               </span>
             </TableCell>
+            <TableCell>
+              {account.user_id}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
       <TableFooter>
         <TableRow>
-          <TableCell colSpan={2}>Total Accounts</TableCell>
+          <TableCell colSpan={3}>Total Accounts</TableCell>
           <TableCell className="text-right">{accounts.length}</TableCell>
         </TableRow>
       </TableFooter>

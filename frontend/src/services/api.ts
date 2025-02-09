@@ -21,18 +21,20 @@ const handleApiError = (error: unknown, defaultMessage: string) => {
 };
 
 export interface BankAccount {
-    id: number;
-    account_number: string;
-    balance: number;
-    user_id: number;
+  id: number;
+  account_number: string;
+  balance: number;
+  user_id: number;
+  account_type: string;
 }
 
+// Fetch all bank accounts
 export const fetchAccounts = async () => {
-    const response = await api.get('/accounts/');
-    return response.data;
-  };
+  const response = await api.get('/accounts/');
+  return response.data;
+};
 
-// Bank Account API
+// Fetch bank accounts by user ID
 export const getBankAccountsByUserId = async (userId: number) => {
   try {
     const { data } = await api.get(`/bank-accounts-by-user/`, {
@@ -44,16 +46,29 @@ export const getBankAccountsByUserId = async (userId: number) => {
   }
 };
 
+// Create a new bank account
+export const createBankAccount = async (userId: number | null, accountType: string) => {
+    try {
+      const { data } = await api.post("/accounts/", {
+        user_id: userId || null,  // Assign user ID if provided, else null
+        account_type: accountType || "checking", // Default account type
+      });
+      return { data, error: null };
+    } catch (error) {
+      return handleApiError(error, "Failed to create bank account");
+    }
+  };
+
 // Transactions API
 export const getTransactions = async (userId: number) => {
-    try {
-        const { data } = await api.get(`/transactions-by-user/`, {
-            params: { id: userId }
-        });
-        return { data, error: null };
-    } catch (error) {
-        return handleApiError(error, "Failed to fetch bank accounts");
-    }
+  try {
+    const { data } = await api.get(`/transactions-by-user/`, {
+      params: { id: userId }
+    });
+    return { data, error: null };
+  } catch (error) {
+    return handleApiError(error, "Failed to fetch transactions");
+  }
 };
 
 export const createTransaction = async (

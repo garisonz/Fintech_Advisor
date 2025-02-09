@@ -23,6 +23,7 @@ from django.shortcuts import HttpResponse
 from django.contrib.auth.models import User
 from .models import BankAccount, Transaction
 from django.contrib.auth.models import User
+import random
 
 # Configure Gemini API
 #commentsntl sdnlndgha ghd
@@ -71,6 +72,39 @@ class BaseViewSet(viewsets.ModelViewSet):
     """Base viewset with common functionality"""
     def get_object_or_404(self, pk):
         return get_object_or_404(self.queryset, pk=pk)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_bank_account(request):
+    user_id = request.data.get('user_id', None)
+    account_type = request.data.get('account_type', 'checking')  # Default to 'checking'
+
+    # Assign user based on input or pick a random user if no ID is given
+    user = None
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)  # Fetch user if exists
+        except User.DoesNotExist:
+            return Response({'error': 'User ID not found'}, status=400)
+    else:
+        user_count = User.objects.count()
+        if user_count > 0:
+            user = User.objects.order_by('?').first()  # Randomly select a user
+
+    data = {
+        'user': user.id if user else None,  # Assign the selected user or None
+        'account_number': str(random.randint(1000000000, 9999999999)),
+        'balance': round(random.uniform(0, 10000), 2),
+        'account_type': account_type,
+    }
+
+    serializer = BankAccountSerializer(data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    
+    return Response(serializer.errors, status=400)
 
 class BankAccountViewSet(BaseViewSet):
     queryset = BankAccount.objects.all()

@@ -2,6 +2,7 @@
 
 import { Heading } from "./_components/header";
 import { AccountTable } from "./_components/user-table";
+import CreateBankAccountButton from "./_components/createBankAccountButton"
 
 function LandingPage() {
   return (
@@ -14,6 +15,7 @@ function LandingPage() {
         <div className="flex justify-center">
           <div className="w-1/2">
             <AccountTable />
+            <CreateBankAccountButton/>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ class BankAccountSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     class Meta:
         model = BankAccount
-        fields = ["id", "account_number", "balance", "user_id"]
+        fields = ["id", "account_number", "balance", "user_id", "account_type"]
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
