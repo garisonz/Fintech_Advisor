@@ -3,6 +3,7 @@ Banking Virtual Assistant
 Team Members
 - Garison Zagorski
 - Erich Hutchison
+- Gilbert Baraka
 
 Project Overview
 An AI-powered chatbot designed to provide hyper-personalized banking assistance. It helps users:
